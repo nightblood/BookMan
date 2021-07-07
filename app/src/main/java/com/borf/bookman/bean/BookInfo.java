@@ -28,9 +28,12 @@ public class BookInfo {
 
     private String imgUrl;
 
-    @Generated(hash = 1867580530)
+    private String status;
+
+    @Generated(hash = 1936229831)
     public BookInfo(Long id, String context, String type, String workExample,
-            String name, String url, String isbn, String sameAs, String imgUrl) {
+            String name, String url, String isbn, String sameAs, String imgUrl,
+            String status) {
         this.id = id;
         this.context = context;
         this.type = type;
@@ -40,6 +43,7 @@ public class BookInfo {
         this.isbn = isbn;
         this.sameAs = sameAs;
         this.imgUrl = imgUrl;
+        this.status = status;
     }
 
     @Generated(hash = 1952025412)
@@ -116,6 +120,14 @@ public class BookInfo {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
 }
