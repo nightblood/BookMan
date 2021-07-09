@@ -2,10 +2,8 @@ package com.borf.bookman;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,10 +15,8 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.blankj.utilcode.util.LogUtils;
-import com.blankj.utilcode.util.ToastUtils;
 import com.borf.bookman.activity.CustomCaptureActivity;
 import com.borf.bookman.base.BaseFragmentActivity;
 import com.borf.bookman.bean.AuthorInfo;
@@ -29,8 +25,8 @@ import com.borf.bookman.bean.BookInfo;
 import com.borf.bookman.bean.BookInfoDao;
 import com.borf.bookman.bean.DaoSession;
 import com.borf.bookman.event.BookInfoEvent;
-import com.borf.bookman.event.MessageEvent;
 import com.borf.bookman.fragment.HomeFragment;
+import com.borf.bookman.utils.DaoUtils;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.qmuiteam.qmui.arch.annotation.DefaultFirstFragment;
@@ -44,14 +40,12 @@ import com.qmuiteam.qmui.util.QMUIStatusBarHelper;
 import com.qmuiteam.qmui.util.QMUIViewOffsetHelper;
 import com.qmuiteam.qmui.widget.QMUIRadiusImageView2;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
-import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.popup.QMUIPopup;
 import com.qmuiteam.qmui.widget.popup.QMUIPopups;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.greenrobot.greendao.query.QueryBuilder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -98,24 +92,10 @@ public class MainActivity extends BaseFragmentActivity {
         setSkinManager(skinManager);
         mOnSkinChangeListener.onSkinChange(skinManager, -1, skinManager.getCurrentSkin());
         mContext = this;
-        EventBus.getDefault().register(this);
 
     }
 
-    private BookInfo selectInDb(String isbn) {
-        DaoSession daoSession = MyApplication.getDaoSession();
-
-        BookInfoDao bookInfoDao = daoSession.getBookInfoDao();
-
-        QueryBuilder qb = bookInfoDao.queryBuilder(); //获取QueryBuilder
-        List<BookInfo> res = qb.where(BookInfoDao.Properties.Isbn.eq(isbn)).list();
-        if (res.size() > 0) {
-            LogUtils.d("在库里找到图书。");
-            return res.get(0);
-        }
-        return null;
-    }
-    private BookInfo searchInDouban(String isbn) throws IOException, JSONException {
+    private BookInfo searchInDouban(Long isbn) throws IOException, JSONException {
         LogUtils.d("未在库里找到图书。前往豆瓣搜索图书。");
 
         String urlIsbn = "http://douban.com/isbn/" + isbn + "/";
@@ -172,10 +152,10 @@ public class MainActivity extends BaseFragmentActivity {
         return bookInfo;
     }
 
-    private BookInfo getBook(String isbn) {
+    private BookInfo getBook(Long isbn) {
         try {
             LogUtils.d("开始搜索图书：" + isbn);
-            BookInfo result = selectInDb(isbn);
+            BookInfo result = DaoUtils.selectBookInfo(isbn);
             if (result != null) {
                 return result;
             }
@@ -193,10 +173,11 @@ public class MainActivity extends BaseFragmentActivity {
         if(result != null) {
             if(result.getContents() != null) {
                 new Thread(() -> {
-                    String isbn = result.getContents();
+                    String isbnStr = result.getContents();
                     try {
+                        Long isbn = Long.parseLong(isbnStr);
                         LogUtils.d("开始搜索图书：" + isbn);
-                        BookInfo book = selectInDb(isbn);
+                        BookInfo book = DaoUtils.selectBookInfo(isbn);
                         if (book != null) {
                             EventBus.getDefault().post(new BookInfoEvent(book, book.getName() + "，此书已在书架中。", "exist"));
                             return;
@@ -225,24 +206,15 @@ public class MainActivity extends BaseFragmentActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-    }
-
-    @Override
     protected RootView onCreateRootView(int fragmentContainerId) {
         return new CustomRootView(this, fragmentContainerId);
     }
 
-
-
     private void showGlobalActionPopup(View v) {
         String[] listItems = new String[]{
                 "扫一扫",
-                "测一测"
+                "搜索",
+                "测试"
         };
         List<String> data = new ArrayList<>();
 
@@ -253,9 +225,7 @@ public class MainActivity extends BaseFragmentActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i == 0) {
-//                    new IntentIntegrator(mContext).initiateScan();
                     new IntentIntegrator(MainActivity.this)
-                            // 自定义Activity，重点是这行----------------------------
                             .setCaptureActivity(CustomCaptureActivity.class)
                             .setDesiredBarcodeFormats(IntentIntegrator.ONE_D_CODE_TYPES)// 扫码的类型,可选：一维码，二维码，一/二维码
                             .setPrompt("请对准二维码")// 设置提示语
@@ -264,9 +234,15 @@ public class MainActivity extends BaseFragmentActivity {
                             .setBarcodeImageEnabled(true)// 扫完码之后生成二维码的图片
                             .initiateScan();// 初始化扫码
                 } else if (i == 1) {
+
+                }
+                else if (i == 2) {
                     new Thread(() -> {
-                        BookInfo book = getBook("9787521729245");
-                        EventBus.getDefault().post(new BookInfoEvent(book, "小测测", "test"));
+                        BookInfo book = null;
+
+                            book = getBook(9787521729245l);
+                            EventBus.getDefault().post(new BookInfoEvent(book, "小测测", "test"));
+
                     }).start();
                 }
                 if (mGlobalAction != null) {

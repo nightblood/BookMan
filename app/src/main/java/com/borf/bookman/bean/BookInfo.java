@@ -5,6 +5,11 @@ import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Index;
 import org.greenrobot.greendao.annotation.Property;
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.ToMany;
+
+import java.util.List;
+import org.greenrobot.greendao.DaoException;
+import org.greenrobot.greendao.annotation.Unique;
 
 @Entity(indexes = {
         @Index(value = "isbn DESC", unique = true)
@@ -22,7 +27,9 @@ public class BookInfo {
 
     private String url;
 
-    private String isbn;
+    @Index(name = "index_isbn", unique = true)
+    @Property(nameInDb = "isbn")
+    private Long isbn;
 
     private String sameAs;
 
@@ -30,9 +37,16 @@ public class BookInfo {
 
     private String status;
 
-    @Generated(hash = 1936229831)
+//    @ToMany(referencedJoinProperty = "isbn")
+//    private List<AuthorInfo> authorInfoList;
+
+    @Generated(hash = 1952025412)
+    public BookInfo() {
+    }
+
+    @Generated(hash = 667671600)
     public BookInfo(Long id, String context, String type, String workExample,
-            String name, String url, String isbn, String sameAs, String imgUrl,
+            String name, String url, Long isbn, String sameAs, String imgUrl,
             String status) {
         this.id = id;
         this.context = context;
@@ -44,10 +58,6 @@ public class BookInfo {
         this.sameAs = sameAs;
         this.imgUrl = imgUrl;
         this.status = status;
-    }
-
-    @Generated(hash = 1952025412)
-    public BookInfo() {
     }
 
     public String getContext() {
@@ -90,14 +100,6 @@ public class BookInfo {
         this.url = url;
     }
 
-    public String getIsbn() {
-        return this.isbn;
-    }
-
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
-    }
-
     public String getSameAs() {
         return this.sameAs;
     }
@@ -128,6 +130,14 @@ public class BookInfo {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Long getIsbn() {
+        return this.isbn;
+    }
+
+    public void setIsbn(Long isbn) {
+        this.isbn = isbn;
     }
 
 }

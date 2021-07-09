@@ -16,10 +16,10 @@
 
 package com.borf.bookman.fragment.controller;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
+import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.InputType;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,11 +32,16 @@ import com.borf.bookman.base.BaseFragment;
 import com.borf.bookman.base.BaseRecyclerAdapter;
 import com.borf.bookman.base.RecyclerViewHolder;
 import com.borf.bookman.bean.BookInfo;
+import com.borf.bookman.bean.BookInfoDao;
+import com.borf.bookman.bean.Tag;
 import com.borf.bookman.decorator.GridDividerItemDecoration;
-import com.borf.bookman.model.QDItemDescription;
+import com.borf.bookman.fragment.BookInfoFragment;
+import com.borf.bookman.utils.DaoUtils;
 import com.bumptech.glide.Glide;
 import com.qmuiteam.qmui.util.QMUIViewHelper;
 import com.qmuiteam.qmui.widget.QMUITopBarLayout;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 
 import java.util.List;
 
@@ -86,11 +91,46 @@ public abstract class HomeController extends LinearLayout {
     private void initTopBar() {
         mTopBar.setTitle(getTitle());
 
-        mTopBar.addRightImageButton(R.mipmap.icon_topbar_about, R.id.topbar_right_about_button).setOnClickListener(new OnClickListener() {
+        mTopBar.addRightImageButton(R.mipmap.search, R.id.topbar_right_about_button).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-//                QDAboutFragment fragment = new QDAboutFragment();
-//                startFragment(fragment);
+                final QMUIDialog.EditTextDialogBuilder builder = new QMUIDialog.EditTextDialogBuilder(getContext());
+                builder.setTitle("搜索图书")
+                        .setPlaceholder("在此输入书名")
+                        .setInputType(InputType.TYPE_CLASS_TEXT)
+                        .addAction("取消", new QMUIDialogAction.ActionListener() {
+                            @Override
+                            public void onClick(QMUIDialog dialog, int index) {
+                                List<BookInfo> bookInfoList = DaoUtils.bookInfoDao.queryBuilder().list();
+                                mItemAdapter.setData(bookInfoList);
+                                mItemAdapter.notifyDataSetChanged();
+                                dialog.dismiss();
+                            }
+                        })
+                        .addAction("搜索", new QMUIDialogAction.ActionListener() {
+                            @Override
+                            public void onClick(QMUIDialog dialog, int index) {
+                                CharSequence text = builder.getEditText().getText();
+                                List<BookInfo> bookInfoList;
+                                if (text != null && text.length() > 0) {
+                                    String key = "%" + text.toString() + "%";
+                                    bookInfoList = DaoUtils.bookInfoDao.queryBuilder()
+                                            .where(BookInfoDao.Properties.Name.like(key))
+                                            .list();
+//                                    DaoUtils.bookTagInfoDao.queryBuilder().where()
+                                } else {
+                                    bookInfoList = DaoUtils.bookInfoDao.queryBuilder().list();
+                                }
+                                if (bookInfoList.size() != 0) {
+                                    mItemAdapter.setData(bookInfoList);
+                                    mItemAdapter.notifyDataSetChanged();
+                                } else {
+                                    ToastUtils.showLong("查无此书！！");
+                                }
+                                dialog.dismiss();
+                            }
+                        });
+                builder.show();
             }
         });
     }
@@ -102,6 +142,18 @@ public abstract class HomeController extends LinearLayout {
             public void onItemClick(View itemView, int pos) {
                 BookInfo item = mItemAdapter.getItem(pos);
                 ToastUtils.showLong(item.getName());
+                Context context = getContext();
+//                if (context instanceof Activity) {
+//                    Intent intent = new Intent(context, BookInfoActivity.class);
+//                    intent.putExtra("isbn", item.getIsbn());
+//                    context.startActivity(intent);
+//                }
+                Bundle bundle = new Bundle();
+                bundle.putLong("isbn", item.getIsbn());
+                BookInfoFragment bookInfoFragment = new BookInfoFragment();
+                bookInfoFragment.setArguments(bundle);
+                startFragment(bookInfoFragment);
+
 //                QDItemDescription item = mItemAdapter.getItem(pos);
 //                try {
 //                    BaseFragment fragment = item.getDemoClass().newInstance();
@@ -125,6 +177,8 @@ public abstract class HomeController extends LinearLayout {
         int spanCount = 3;
         mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
         mRecyclerView.addItemDecoration(new GridDividerItemDecoration(getContext(), spanCount));
+
+//        mItemAdapter.he
     }
 
     protected abstract ItemAdapter getItemAdapter();

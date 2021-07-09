@@ -163,12 +163,7 @@ public class HomeFragment extends BaseFragment {
     }
 
     private void initPagers() {
-        HomeController.HomeControlListener listener = new HomeController.HomeControlListener() {
-            @Override
-            public void startFragment(BaseFragment fragment) {
-                HomeFragment.this.startFragment(fragment);
-            }
-        };
+        HomeController.HomeControlListener listener = fragment -> HomeFragment.this.startFragment(fragment);
         mPages = new HashMap<>();
 
         homeComponentsController = new HomeComponentsController(getActivity());

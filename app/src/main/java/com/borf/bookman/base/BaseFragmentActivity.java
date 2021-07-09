@@ -16,11 +16,17 @@
 
 package com.borf.bookman.base;
 
+import android.os.Bundle;
+import android.os.PersistableBundle;
+
 import com.borf.bookman.event.BaseEvent;
 import com.qmuiteam.qmui.arch.QMUIFragmentActivity;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import androidx.annotation.Nullable;
 
 /**
  * Created by cgspine on 2018/1/7.
@@ -32,4 +38,19 @@ public abstract class BaseFragmentActivity extends QMUIFragmentActivity {
     public void onEvent(BaseEvent baseEvent) {
 
     }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
+    }
+
 }

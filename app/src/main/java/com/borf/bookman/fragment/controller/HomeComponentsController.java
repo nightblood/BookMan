@@ -21,6 +21,9 @@ import android.content.Context;
 import com.borf.bookman.bean.BookInfo;
 import com.borf.bookman.manager.QDDataManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * @author cginechen
@@ -42,7 +45,10 @@ public class HomeComponentsController extends HomeController {
 
     @Override
     protected ItemAdapter getItemAdapter() {
-        bookAdapter = new ItemAdapter(getContext(), QDDataManager.getInstance().getAllBooks());
+        List<BookInfo> allBooks = QDDataManager.getInstance().getAllBooks();
+        if (allBooks == null)
+            allBooks = new ArrayList<>();
+        bookAdapter = new ItemAdapter(getContext(), allBooks);
         return bookAdapter;
     }
 

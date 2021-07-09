@@ -18,16 +18,28 @@ package com.borf.bookman.base;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.Bundle;
 
 import com.borf.bookman.MainActivity;
+import com.borf.bookman.event.BaseEvent;
 import com.qmuiteam.qmui.arch.QMUIActivity;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import static com.borf.bookman.MyApplication.getContext;
 
 
 @SuppressLint("Registered")
 public class BaseActivity extends QMUIActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
+    }
 
     @Override
     protected int backViewInitOffset() {
@@ -41,7 +53,20 @@ public class BaseActivity extends QMUIActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
+    }
+
+    @Override
     public Intent onLastActivityFinish() {
         return new Intent(this, MainActivity.class);
+    }
+
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onEvent(BaseEvent baseEvent) {
+
     }
 }

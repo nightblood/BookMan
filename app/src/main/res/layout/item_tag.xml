@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/select_tag"
+    android:padding="10px"
+    android:layout_margin="5px"
+    android:textColor="@drawable/tag_text_color"
+    android:checked="false"
+    >
+</CheckedTextView>

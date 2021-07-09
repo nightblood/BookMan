@@ -125,77 +125,77 @@ public class QDDataManager {
         return null;
     }
 
-    private BookInfo searchInDouban(String isbn) throws IOException, JSONException {
-        LogUtils.d("未在库里找到图书。前往豆瓣搜索图书。");
+//    private BookInfo searchInDouban(Long isbn) throws IOException, JSONException {
+//        LogUtils.d("未在库里找到图书。前往豆瓣搜索图书。");
+//
+//        String urlIsbn = "http://douban.com/isbn/" + isbn + "/";
+//        Document document = Jsoup.connect(urlIsbn)
+//                .header("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36 QIHU 360SE")
+//                .get();
+//        String title = document.getElementsByTag("title").get(0).text();
+//        if (title.contains("豆瓣错误")) {
+//            LogUtils.i("豆瓣图书中查无此书，请检查isbn是否正确。" + isbn);
+//            return null;
+//        }
+//        LogUtils.i("豆瓣图书中查到，正在解析数据。");
+//
+//        Element ele = document.getElementsByClass("nbg").get(0);
+//        String bookImg = ele.attr("href");
+//        String strBookInfo = document.getElementsByAttributeValue("type", "application/ld+json").get(0).data();
+//        JSONObject jsonObject = new JSONObject(strBookInfo);
+//        String name = jsonObject.getString("name");
+//        String context = jsonObject.getString("@context");
+//        String type = jsonObject.getString("@type");
+//        String workExample = jsonObject.getString("workExample");
+//        String url = jsonObject.getString("url");
+//        String sameAs = jsonObject.getString("sameAs");
+//        JSONArray jsonArray = jsonObject.getJSONArray("author");
+//
+//        BookInfo bookInfo = new BookInfo();
+//        bookInfo.setContext(context);
+//        bookInfo.setImgUrl(bookImg);
+//        bookInfo.setIsbn(isbn);
+//        bookInfo.setName(name);
+//        bookInfo.setUrl(url);
+//        bookInfo.setWorkExample(workExample);
+//        bookInfo.setType(type);
+//        bookInfo.setSameAs(sameAs);
+//
+//        DaoSession daoSession = MyApplication.getDaoSession();
+//        BookInfoDao bookInfoDao = daoSession.getBookInfoDao();
+//        AuthorInfoDao authorInfoDao = daoSession.getAuthorInfoDao();
+//
+//        bookInfoDao.insert(bookInfo);
+//
+//        List<AuthorInfo> authorInfos = new ArrayList<>();
+//        for (int i = 0; i < jsonArray.length(); i++) {
+//            AuthorInfo authorInfo = new AuthorInfo();
+//            JSONObject object = (JSONObject) jsonArray.get(i);
+//            String author_type = object.getString("@type");
+//            String author_name = object.getString("name");
+//            authorInfo.setIsbn(isbn);
+//            authorInfo.setName(author_name);
+//            authorInfo.setType(author_type);
+//            authorInfos.add(authorInfo);
+//            authorInfoDao.insert(authorInfo);
+//        }
+//        return bookInfo;
+//    }
 
-        String urlIsbn = "http://douban.com/isbn/" + isbn + "/";
-        Document document = Jsoup.connect(urlIsbn)
-                .header("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36 QIHU 360SE")
-                .get();
-        String title = document.getElementsByTag("title").get(0).text();
-        if (title.contains("豆瓣错误")) {
-            LogUtils.i("豆瓣图书中查无此书，请检查isbn是否正确。" + isbn);
-            return null;
-        }
-        LogUtils.i("豆瓣图书中查到，正在解析数据。");
-
-        Element ele = document.getElementsByClass("nbg").get(0);
-        String bookImg = ele.attr("href");
-        String strBookInfo = document.getElementsByAttributeValue("type", "application/ld+json").get(0).data();
-        JSONObject jsonObject = new JSONObject(strBookInfo);
-        String name = jsonObject.getString("name");
-        String context = jsonObject.getString("@context");
-        String type = jsonObject.getString("@type");
-        String workExample = jsonObject.getString("workExample");
-        String url = jsonObject.getString("url");
-        String sameAs = jsonObject.getString("sameAs");
-        JSONArray jsonArray = jsonObject.getJSONArray("author");
-
-        BookInfo bookInfo = new BookInfo();
-        bookInfo.setContext(context);
-        bookInfo.setImgUrl(bookImg);
-        bookInfo.setIsbn(isbn);
-        bookInfo.setName(name);
-        bookInfo.setUrl(url);
-        bookInfo.setWorkExample(workExample);
-        bookInfo.setType(type);
-        bookInfo.setSameAs(sameAs);
-
-        DaoSession daoSession = MyApplication.getDaoSession();
-        BookInfoDao bookInfoDao = daoSession.getBookInfoDao();
-        AuthorInfoDao authorInfoDao = daoSession.getAuthorInfoDao();
-
-        bookInfoDao.insert(bookInfo);
-
-        List<AuthorInfo> authorInfos = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            AuthorInfo authorInfo = new AuthorInfo();
-            JSONObject object = (JSONObject) jsonArray.get(i);
-            String author_type = object.getString("@type");
-            String author_name = object.getString("name");
-            authorInfo.setIsbn(isbn);
-            authorInfo.setName(author_name);
-            authorInfo.setType(author_type);
-            authorInfos.add(authorInfo);
-            authorInfoDao.insert(authorInfo);
-        }
-        return bookInfo;
-    }
-
-    private BookInfo getBook(String isbn) {
-        try {
-            System.out.println(isbn);
-            LogUtils.d("开始搜索图书：" + isbn);
-            List<BookInfo> result = selectBookInDb(isbn);
-            if (result != null) {
-                return result.get(0);
-            }
-            return searchInDouban(isbn);
-        }catch (Exception exception) {
-            LogUtils.e(exception);
-            return null;
-        }
-    }
+//    private BookInfo getBook(String isbn) {
+//        try {
+//            System.out.println(isbn);
+//            LogUtils.d("开始搜索图书：" + isbn);
+//            List<BookInfo> result = selectBookInDb(isbn);
+//            if (result != null) {
+//                return result.get(0);
+//            }
+//            return searchInDouban(isbn);
+//        }catch (Exception exception) {
+//            LogUtils.e(exception);
+//            return null;
+//        }
+//    }
 
 
 
